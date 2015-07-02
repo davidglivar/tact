@@ -41,10 +41,10 @@ function createLintTask(taskName, files) {
     return gulp.src(files)
       .pipe($.plumber())
       .pipe($.eslint())
-      .pipe($.eslint.format())
-      .pipe($.eslint.failOnError())
-      .pipe($.jscs())
-      .pipe($.notify(jscsNotify));
+      .pipe($.eslint.format());
+      //.pipe($.eslint.failOnError())
+      //.pipe($.jscs())
+      //.pipe($.notify(jscsNotify));
   });
 }
 
@@ -134,10 +134,10 @@ gulp.task('test', ['lint-src', 'lint-test', 'flow'], function() {
 // Ensure that linting occurs before browserify runs. This prevents
 // the build from breaking due to poorly formatted code.
 gulp.task('build-in-sequence', function(callback) {
-  runSequence(['lint-src', 'lint-test'], 'browserify', callback);
+  runSequence(['lint-src', 'lint-test', 'flow'], 'browserify', callback);
 });
 
-gulp.task('flow', function () {
+gulp.task('flow', ['clean-tmp'], function (done) {
   gulp.src(['src/**/*.js'])
     .pipe($.sourcemaps.init())
     .pipe($.babel({ blacklist: 'flow' }))
@@ -147,24 +147,24 @@ gulp.task('flow', function () {
     })
     .pipe($.plumber())
     .pipe($.sourcemaps.write('.'))
-    .pipe($.flowtype({
-      all: false,
-      weak: false,
-      killFlow: false,
-      beep: true,
-      abort: false,
-      reporter: {
-        reporter: function (errors) {
-          return sourcemapReporter.reporter(errors, { sourceRoot: './src' });
-        }
-      }
-    }));
+    .pipe(gulp.dest('./tmp/flow'))
+    .on('end', function () {
+      return gulp.src('./tmp/flow/**/*.js')
+        .pipe($.flowtype({
+          all: true,
+          weak: false,
+          killFlow: false,
+          beep: true,
+          abort: false
+        }))
+        .on('end', done);
+    });
 });
 
 const watchFiles = ['src/**/*', 'test/**/*', 'package.json', '**/.eslintrc', '.jscsrc'];
 
 // Run the headless unit tests as you make changes.
-gulp.task('watch', function() {
+gulp.task('watch', ['default'], function() {
   gulp.watch(watchFiles, ['test']);
 });
 

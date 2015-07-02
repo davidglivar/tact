@@ -1,5 +1,6 @@
 {
-  "preset": "google",
+  "preset": "node-style-guide",
   "maximumLineLength": null,
-  "esnext": true
+  "esnext": true,
+  "disallowCommaBeforeLineBreak": true
 }
