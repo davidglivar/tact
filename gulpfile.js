@@ -4,6 +4,7 @@ const fs = require('fs');
 const del = require('del');
 const glob = require('glob');
 const path = require('path');
+const babel = require('babel');
 const mkdirp = require('mkdirp');
 const babelify = require('babelify');
 const isparta = require('isparta');
@@ -59,6 +60,9 @@ gulp.task('build', ['lint-src', 'clean'], function(done) {
   esperanto.bundle({
     base: 'src',
     entry: config.entryFileName,
+    transform: function (src) {
+      return babel.transform(src).code;
+    }
   }).then(function(bundle) {
     var res = bundle.toUmd({
       sourceMap: true,

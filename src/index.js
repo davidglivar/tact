@@ -1,2 +1,4 @@
-//import { tactile } from './tactile';
+import { tactile } from './tactile';
+
+export const tact = { tactile };
 
